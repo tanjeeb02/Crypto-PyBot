@@ -12,6 +12,7 @@ import pandas as pd
 
 def main():
     # STEP 1 - Get list of tradeable symbols
+    print('Getting symbols...')
     try:
         sym_response = get_tradeable_symbols()
     except Exception as e:
