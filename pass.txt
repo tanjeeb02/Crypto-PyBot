@@ -1,0 +1,4 @@
+2FA Recovery code: QP34XJ3KM6DFAA4C
+API Key name: first-key
+API Key Testnet: odg1BU6zom7FjeK9aN
+API Secret Testnet: xaGNbnSlb2BfIz08vxZQzkjfhWICuVMpEbEb
