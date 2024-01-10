@@ -1,4 +1,30 @@
 import math
+import pandas as pd
+import numpy as np
+from statsmodels.tsa.stattools import coint
+import statsmodels.api as sm
+
+
+# Calculate spread
+def calculate_spread(series_1, series_2, hedge_ratio):
+    spread = pd.Series(series_1) - (pd.Series(series_2) * hedge_ratio)
+    return spread
+
+
+# Calculate co-integration
+def calculate_cointegration(series_1, series_2):
+    coint_flag = 0
+    coint_res = coint(series_1, series_2)
+    coint_t = coint_res[0]
+    p_value = coint_res[1]
+    critical_value = coint_res[2][1]
+    model = sm.OLS(series_1, series_2).fit()
+    hedge_ratio = model.params[0]
+    spread = calculate_spread(series_1, series_2, hedge_ratio)
+    zero_crossings = len(np.where(np.diff(np.sign(spread)))[0])
+    if p_value < 0.5 and coint_t < critical_value:
+        coint_flag = 1
+    return coint_flag, round(coint_t, 2), round(p_value, 2), round(critical_value, 2), round(hedge_ratio, 2), zero_crossings
 
 
 # Put close prices into a list
@@ -10,7 +36,6 @@ def extract_close_prices(prices):
                 return []
             else:
                 close_prices.append(float(item[4]))
-    print(close_prices)
     return close_prices
 
 
@@ -34,3 +59,24 @@ def get_cointegrated_pairs(prices):
                 # Get close prices
                 series_1 = extract_close_prices(prices[sym_1])
                 series_2 = extract_close_prices(prices[sym_2])
+
+
+                # Check for co-integration and add cointegrated pairs
+                coint_flag, p_value, t_value, c_value, hedge_ratio, zero_crossings = calculate_cointegration(series_1, series_2)
+                if coint_flag == 1:
+                    included_list.append(unique)
+                    coint_pair_list.append({
+                        'sym_1': sym_1,
+                        'sym_2': sym_2,
+                        'p_value': p_value,
+                        't_value': t_value,
+                        'c_value': c_value,
+                        'hedge_ratio': hedge_ratio,
+                        'zero_crossings': zero_crossings
+                    })
+
+    # Output results
+    df_coint = pd.DataFrame(coint_pair_list)
+    df_coint = df_coint.sort_values('zero_crossings', ascending=False)
+    df_coint.to_csv('data/2_cointegrated_pairs.csv')
+    return df_coint
