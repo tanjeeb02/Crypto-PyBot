@@ -1,8 +1,8 @@
-import math
-import pandas as pd
-import numpy as np
 from statsmodels.tsa.stattools import coint
 import statsmodels.api as sm
+import numpy as np
+import pandas as pd
+import math
 
 
 # Calculate spread
@@ -24,7 +24,7 @@ def calculate_cointegration(series_1, series_2):
     zero_crossings = len(np.where(np.diff(np.sign(spread)))[0])
     if p_value < 0.5 and coint_t < critical_value:
         coint_flag = 1
-    return coint_flag, round(coint_t, 2), round(p_value, 2), round(critical_value, 2), round(hedge_ratio, 2), zero_crossings
+    return coint_flag, round(coint_t, 4), round(p_value, 4), round(critical_value, 4), round(hedge_ratio, 4), zero_crossings
 
 
 # Put close prices into a list
@@ -54,15 +54,18 @@ def get_cointegrated_pairs(prices):
                 sorted_characters = sorted(sym_1 + sym_2)
                 unique = ''.join(sorted_characters)
                 if unique in included_list:
-                    break
+                    continue
 
                 # Get close prices
                 series_1 = extract_close_prices(prices[sym_1])
                 series_2 = extract_close_prices(prices[sym_2])
 
+                # Skip the pair if one of the series is constant
+                if np.std(series_1) < 1e-8 or np.std(series_2) < 1e-8:
+                    continue
 
                 # Check for co-integration and add cointegrated pairs
-                coint_flag, p_value, t_value, c_value, hedge_ratio, zero_crossings = calculate_cointegration(series_1, series_2)
+                coint_flag, t_value, p_value, c_value, hedge_ratio, zero_crossings = calculate_cointegration(series_1, series_2)
                 if coint_flag == 1:
                     included_list.append(unique)
                     coint_pair_list.append({
