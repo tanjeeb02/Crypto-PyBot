@@ -23,7 +23,7 @@ time_start_seconds = int(time_start_date.timestamp())
 def get_price_klines(symbol):
     # Get prices
     prices = session.get_mark_price_kline(
-        category='linear',
+        category='inverse',
         symbol=symbol,
         interval=timeframe,
         start=time_start_seconds,
