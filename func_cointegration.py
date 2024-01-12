@@ -1,8 +1,19 @@
+from config_strategy_api import z_score_window
 from statsmodels.tsa.stattools import coint
 import statsmodels.api as sm
 import numpy as np
 import pandas as pd
 import math
+
+
+# Calculate Z-score
+def calculate_zscore(spread):
+    df = pd.DataFrame(spread)
+    mean = df.rolling(center=False, window=z_score_window).mean()
+    std = df.rolling(center=False, window=z_score_window).std()
+    x = df.rolling(center=False, window=1).mean()
+    df['Z-Score'] = (x - mean) / std
+    return df['Z-Score'].astype(float).values
 
 
 # Calculate spread
@@ -24,7 +35,8 @@ def calculate_cointegration(series_1, series_2):
     zero_crossings = len(np.where(np.diff(np.sign(spread)))[0])
     if p_value < 0.5 and coint_t < critical_value:
         coint_flag = 1
-    return coint_flag, round(coint_t, 4), round(p_value, 4), round(critical_value, 4), round(hedge_ratio, 4), zero_crossings
+    return coint_flag, round(coint_t, 4), round(p_value, 4), round(critical_value, 4), round(hedge_ratio,
+                                                                                             4), zero_crossings
 
 
 # Put close prices into a list
@@ -65,7 +77,8 @@ def get_cointegrated_pairs(prices):
                     continue
 
                 # Check for co-integration and add cointegrated pairs
-                coint_flag, t_value, p_value, c_value, hedge_ratio, zero_crossings = calculate_cointegration(series_1, series_2)
+                coint_flag, t_value, p_value, c_value, hedge_ratio, zero_crossings = calculate_cointegration(series_1,
+                                                                                                             series_2)
                 if coint_flag == 1:
                     included_list.append(unique)
                     coint_pair_list.append({
