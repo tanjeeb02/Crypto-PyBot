@@ -3,11 +3,14 @@
 """
 
 import warnings
+
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 from func_get_symbols import get_tradeable_symbols
 from func_prices_json import store_price_history
-import pandas as pd
+from func_cointegration import get_cointegrated_pairs
+from func_plot_trends import plot_trends
+import json
 
 
 def main():
@@ -22,6 +25,23 @@ def main():
     print('Getting price history...')
     if len(sym_response) > 0:
         store_price_history(sym_response)
+
+    # STEP 3 - Find Cointegrated Pairs
+    print('Finding cointegrated pairs...')
+    with open('data/1_price_list.json') as json_file:
+        price_data = json.load(json_file)
+        if len(price_data) > 0:
+            coint_pairs = get_cointegrated_pairs(price_data)
+    print('Done')
+
+    # STEP 4 - Plot trends and save for backtesting
+    print('Plotting trends...')
+    symbol_1 = 'PAXGUSDT'
+    symbol_2 = 'DATAUSDT'
+    with open('data/1_price_list.json') as json_file:
+        price_data = json.load(json_file)
+        if len(price_data) > 0:
+            plot_trends(symbol_1, symbol_2, price_data)
 
 
 if __name__ == '__main__':
