@@ -16,8 +16,11 @@ def handle_message(message):
     print(message)
 
 
-ws.orderbook_stream(50, f"{ticker_1}", handle_message)
-ws.orderbook_stream(50, f"{ticker_2}", handle_message)
+# ws.orderbook_stream(50, f"{ticker_1}", handle_message)
+# ws.orderbook_stream(50, f"{ticker_2}", handle_message)
+ws.liquidation_stream(f"{ticker_1}", handle_message)
+ws.liquidation_stream(f"{ticker_2}", handle_message)
+
 
 while True:
     sleep(1)

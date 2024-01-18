@@ -5,8 +5,19 @@ from config_execution_api import price_rounding_ticker_1
 from config_execution_api import price_rounding_ticker_2
 from config_execution_api import quantity_rounding_ticker_1
 from config_execution_api import quantity_rounding_ticker_2
-from ..Strategy.func_cointegration import extract_close_prices
 import math
+
+
+# Put close prices into a list
+def extract_close_prices(prices):
+    close_prices = []
+    if 'result' in prices and 'list' in prices['result']:
+        for item in prices['result']['list']:
+            if math.isnan(float(item[4])):
+                return []
+            else:
+                close_prices.append(float(item[4]))
+    return close_prices
 
 
 # Get trade details and latest prices
@@ -24,9 +35,8 @@ def get_trade_details(orderbook, direction='long', capital=0):
     if orderbook:
 
         # Set price rounding
-        price_rounding = price_rounding_ticker_1 if orderbook[0]['symbol'] == ticker_1 else price_rounding_ticker_2
-        quantity_rounding = quantity_rounding_ticker_1 if orderbook[0][
-                                                              'symbol'] == ticker_1 else quantity_rounding_ticker_2
+        price_rounding = price_rounding_ticker_1 if orderbook['data']['s'] == ticker_1 else price_rounding_ticker_2
+        quantity_rounding = quantity_rounding_ticker_1 if orderbook['data']['s'] == ticker_1 else quantity_rounding_ticker_2
 
         # Organize prices
         for level in orderbook:
