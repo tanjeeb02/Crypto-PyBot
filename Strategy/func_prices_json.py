@@ -19,7 +19,7 @@ def store_price_history(symbols):
 
     # Output prices to JSON
     if len(price_history_dict) > 0:
-        with open('data/1_price_list.json', 'w') as fp:
+        with open('../data/1_price_list.json', 'w') as fp:
             json.dump(price_history_dict, fp, indent=4)
         print('Prices saved successfully')
 

@@ -33,7 +33,7 @@ def plot_trends(sym_1, sym_2, price_data):
     df_2['sym_2'] = prices_2
     df_2['spread'] = spread
     df_2['zscore'] = zscore
-    df_2.to_csv('data/3_backtest.csv')
+    df_2.to_csv('../data/3_backtest.csv')
     print('File for backtesting saved')
 
     # Plot prices and trends

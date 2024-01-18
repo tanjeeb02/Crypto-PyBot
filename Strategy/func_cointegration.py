@@ -94,5 +94,5 @@ def get_cointegrated_pairs(prices):
     # Output results
     df_coint = pd.DataFrame(coint_pair_list)
     df_coint = df_coint.sort_values('zero_crossings', ascending=False)
-    df_coint.to_csv('data/2_cointegrated_pairs.csv')
+    df_coint.to_csv('../data/2_cointegrated_pairs.csv')
     return df_coint

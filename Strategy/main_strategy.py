@@ -28,7 +28,7 @@ def main():
 
     # STEP 3 - Find Cointegrated Pairs
     print('Finding cointegrated pairs...')
-    with open('data/1_price_list.json') as json_file:
+    with open('../data/1_price_list.json') as json_file:
         price_data = json.load(json_file)
         if len(price_data) > 0:
             coint_pairs = get_cointegrated_pairs(price_data)
@@ -38,7 +38,7 @@ def main():
     print('Plotting trends...')
     symbol_1 = 'ENSUSDT'
     symbol_2 = 'LRCUSDT'
-    with open('data/1_price_list.json') as json_file:
+    with open('../data/1_price_list.json') as json_file:
         price_data = json.load(json_file)
         if len(price_data) > 0:
             plot_trends(symbol_1, symbol_2, price_data)
