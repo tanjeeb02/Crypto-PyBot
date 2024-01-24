@@ -5,12 +5,24 @@ from config_execution_api import price_rounding_ticker_1
 from config_execution_api import price_rounding_ticker_2
 from config_execution_api import quantity_rounding_ticker_1
 from config_execution_api import quantity_rounding_ticker_2
-from ..Strategy.func_cointegration import extract_close_prices
 import math
+from decimal import Decimal, ROUND_HALF_UP
+
+
+# Put close prices into a list
+def extract_close_prices(prices):
+    close_prices = []
+    if 'result' in prices and 'list' in prices['result']:
+        for item in prices['result']['list']:
+            if math.isnan(float(item[4])):
+                return []
+            else:
+                close_prices.append(float(item[4]))
+    return close_prices
 
 
 # Get trade details and latest prices
-def get_trade_details(orderbook, direction='long', capital=0):
+def get_trade_details(orderbook, trade, direction='long', capital=0):
     # Set calculation and output variables
     price_rounding = 0
     quantity_rounding = 0
@@ -24,20 +36,21 @@ def get_trade_details(orderbook, direction='long', capital=0):
     if orderbook:
 
         # Set price rounding
-        price_rounding = price_rounding_ticker_1 if orderbook[0]['symbol'] == ticker_1 else price_rounding_ticker_2
-        quantity_rounding = quantity_rounding_ticker_1 if orderbook[0][
-                                                              'symbol'] == ticker_1 else quantity_rounding_ticker_2
+        price_rounding = price_rounding_ticker_1 if orderbook['data']['s'] == ticker_1 else price_rounding_ticker_2
+        price_rounding_decimal = Decimal('1').scaleb(-price_rounding)
+        quantity_rounding = quantity_rounding_ticker_1 if orderbook['data'][
+                                                              's'] == ticker_1 else quantity_rounding_ticker_2
 
         # Organize prices
-        for level in orderbook:
-            if level['side'] == 'Buy':
-                bid_items_list.append(level['price'])
-            else:
-                ask_items_list.append(level['price'])
+        if len(orderbook['data']['b']) > 0:
+            for i in range(0, len(orderbook['data']['b'])):
+                bid_items_list.append(orderbook['data']['b'][i][0])
+        if len(orderbook['data']['a']) > 0:
+            for i in range(0, len(orderbook['data']['a'])):
+                ask_items_list.append(orderbook['data']['a'][i][0])
 
         # Calculate the price, size, stop loss and average liquidity
         if len(ask_items_list) > 0 and len(bid_items_list) > 0:
-
             # Sort lists
             bid_items_list.sort(reverse=True)
             ask_items_list.sort()
@@ -47,12 +60,46 @@ def get_trade_details(orderbook, direction='long', capital=0):
             nearest_bid = bid_items_list[0]
 
             # Calculate hard stop loss
-            if direction == 'long':
-                mid_price = nearest_bid
-            else:
-                mid_price = nearest_ask
+            mid_price = Decimal(nearest_bid if direction == 'long' else nearest_ask)
 
-            stop_loss = round(mid_price * (1 + stop_loss_fail_safe), price_rounding)
+            stop_loss_fail_safe_decimal = Decimal(str(stop_loss_fail_safe))
+            stop_loss = (mid_price * (Decimal('1') + stop_loss_fail_safe_decimal)).quantize(price_rounding_decimal, rounding=ROUND_HALF_UP)
 
     # Output results
     return mid_price, stop_loss, quantity
+
+
+from pybit.unified_trading import WebSocket
+from time import sleep
+
+ws = WebSocket(
+    testnet=True,
+    channel_type="linear",
+)
+
+global_orderbook = {}
+global_trade = {}
+
+
+def handle_message(message):
+    global global_orderbook, global_trade
+
+    topic = message.get('topic', '')
+    if 'orderbook.50' in topic:
+        global_orderbook = message
+    elif 'publicTrade' in topic:
+        global_trade = message['data'][0]['S']
+
+
+ws.orderbook_stream(50, f"{ticker_1}", handle_message)
+ws.trade_stream(f"{ticker_1}", handle_message)
+
+while True:
+    sleep(1)
+    if global_orderbook and global_trade:
+        print("Bid:", global_orderbook['data']['b'])
+        print("Ask:", global_orderbook['data']['a'])
+        m_price, s_loss, quant = get_trade_details(global_orderbook, global_trade, direction='long', capital=5000)
+        print("Mid Price:", m_price)
+        print("Stop Loss:", s_loss)
+        print("Quantity:", quant)
