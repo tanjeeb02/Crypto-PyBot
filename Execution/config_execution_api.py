@@ -5,6 +5,7 @@
 
 # API Imports
 from pybit.unified_trading import HTTP
+
 # from pybit.unified_trading import WebSocket
 
 
@@ -23,7 +24,7 @@ limit_order_basis = True
 
 tradeable_capital_usdt = 2000  # to be split among the two tickers
 stop_loss_fail_safe = 0.15  # 15% stop loss
-signal_trigger_thresh = 1.1 # z-score threshold for trade signal
+signal_trigger_thresh = 1.1  # z-score threshold for trade signal
 
 kline_limit = 200
 timeframe = 'D'
@@ -48,6 +49,8 @@ ws_public_url = 'wss://stream-testnet.bybit.com/v5/public/inverse'
 # SESSION Activation
 session = HTTP(
     testnet=True,
-    api_key=api_key_testnet,
-    api_secret=api_secret_testnet,
+    api_key=api_key,
+    api_secret=api_secret,
 )
+
+
