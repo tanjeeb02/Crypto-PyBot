@@ -71,3 +71,29 @@ def get_trade_details(orderbook, direction='long', capital=0):
 
     # Output results
     return mid_price, stop_loss, quantity
+
+
+# from pybit.unified_trading import WebSocket
+#
+# ws = WebSocket(
+#     testnet=True,
+#     channel_type="linear",
+# )
+#
+# global_orderbook = {}
+#
+#
+# def handle_message(message):
+#     global global_orderbook
+#
+#     topic = message.get('topic', '')
+#     if 'orderbook.50' in topic:
+#         global_orderbook = message
+#
+#
+# ws.orderbook_stream(50, f"{ticker_1}", handle_message)
+#
+# while True:
+#     if global_orderbook:
+#         mid_price_n, stop_loss_n, quantity_n = get_trade_details(global_orderbook, 'short', 1000)
+#         print(mid_price_n, stop_loss_n, quantity_n)
