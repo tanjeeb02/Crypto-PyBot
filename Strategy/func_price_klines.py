@@ -34,7 +34,4 @@ def get_price_klines(symbol):
     # time.sleep(0.1)
 
     # Return output
-    if len(prices['result']['list']) != kline_limit:
-        return []
-    else:
-        return prices
+    return [] if len(prices['result']['list']) != kline_limit else prices
