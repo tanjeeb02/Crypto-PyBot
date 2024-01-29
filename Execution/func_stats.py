@@ -1,7 +1,6 @@
 from config_execution_api import z_score_window
 from statsmodels.tsa.stattools import coint
 import statsmodels.api as sm
-import numpy as np
 import pandas as pd
 import math
 
@@ -22,8 +21,8 @@ def calculate_spread(series_1, series_2, hedge_ratio):
     return spread
 
 
-# Calculate co-integration
-def calculate_cointegration(series_1, series_2):
+# Calculate metrics
+def calculate_metrics(series_1, series_2):
     coint_flag = 0
     coint_res = coint(series_1, series_2)
     coint_t = coint_res[0]
