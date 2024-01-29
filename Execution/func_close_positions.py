@@ -6,22 +6,22 @@ from config_execution_api import session
 # Get positions
 def get_position_info(ticker):
     # Declare variables
-    side = 0
-    size = ''
+    side = ''
+    size = 0
+    price = 0
 
     # Get position info
     position = session.get_positions(category="linear", symbol=ticker)
     if 'retMsg' in position.keys():
         if position['retMsg'] == 'OK':
-            if position['result']['list'][0]['side'] == 'Buy':
-                side = 'Buy'
-                size = position['result']['list'][0]['size']
-            else:
-                side = 'Sell'
-                size = position['result']['list'][0]['size']
+            side = position['result']['list'][0]['side']
+            size = position['result']['list'][0]['size']
+            price = position['result']['list'][0]['avgPrice']
+        else:
+            return '', 0, 0
 
     # Return output
-    return side, size
+    return side, size, price
 
 
 # Place market close order
@@ -47,8 +47,8 @@ def close_all_positions(kill_switch):
     session.cancel_all_orders(category='linear', settleCoin='USDT')
 
     # Get position information
-    side_1, size_1 = get_position_info(signal_positive_ticker)
-    side_2, size_2 = get_position_info(signal_negative_ticker)
+    side_1, size_1, price_1 = get_position_info(signal_positive_ticker)
+    side_2, size_2, price_2 = get_position_info(signal_negative_ticker)
 
     if int(size_1) > 0:
         place_market_close_order(signal_positive_ticker, side_2, size_1)
